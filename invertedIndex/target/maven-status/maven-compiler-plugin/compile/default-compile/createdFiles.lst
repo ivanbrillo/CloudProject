@@ -1,0 +1,8 @@
+it/unipi/hadoop/InvertedIndexInMapperCombiner$InvIndexReducer.class
+it/unipi/hadoop/InvertedIndex$InvIndexReducer.class
+it/unipi/hadoop/InvertedIndex$InvIndexCombiner.class
+it/unipi/hadoop/InvertedIndexInMapperCombiner.class
+it/unipi/hadoop/InvertedIndexInMapperCombiner$InvIndexMapper.class
+it/unipi/hadoop/InvertedIndex.class
+it/unipi/hadoop/FileCountData.class
+it/unipi/hadoop/InvertedIndex$InvIndexMapper.class
