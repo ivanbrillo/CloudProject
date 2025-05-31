@@ -2,59 +2,75 @@
 
 TIMES=1
 
-# List of input size directories
-DATASET_SIZES=(10doc 20doc)                                # Dataset size: choose between "10doc" or "20doc"
-SIZES=(512KB 1MB 512MB 1GB 2GB)
-PARTITIONS=(-1 5 15)
-OUTPUT_BASE_INDEX=302
+DOCS=(10doc 20doc)
+SIZES=(2GB)
+PARTITIONS=(-1)
+OUTPUT_BASE_INDEX=215
 
-for DATASET_SIZE in "${DATASET_SIZES[@]}"; do
-    echo "=== Running with ${DATASET_SIZE} documents ==="
+for DOC in "${DOCS[@]}"; do
+    echo "=== Running with ${DOC} documents ==="
 
     for PARTITION in "${PARTITIONS[@]}"; do
         echo "=== Running with ${PARTITION} partitions ==="
     
-        
         for (( RUN_ID=1; RUN_ID<=TIMES; RUN_ID++ )); do
             echo "--- Iteration #${RUN_ID} ---"
         
             for SIZE in "${SIZES[@]}"; do
-                INPUT_DIR="projectInput_${DATASET_SIZE}/${SIZE}"
-                OUTPUT_DIR="outputSpark_${DATASET_SIZE}/${OUTPUT_BASE_INDEX}_${SIZE}"
+                INPUT_DIR="projectInput_${DOC}/${SIZE}"
+                OUTPUT_DIR="outputSpark_${DOC}/${OUTPUT_BASE_INDEX}_${SIZE}"
 
-                spark-submit --master yarn sparkInvertedIndex2.py "$INPUT_DIR" "$OUTPUT_DIR" "$PARTITION" > spark_log.txt 2>&1
+                spark-submit --master yarn --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.maxExecutors=10 --conf spark.executor.processTreeMetrics.enabled=true sparkInvertedIndex2.py "$INPUT_DIR" "$OUTPUT_DIR" "$PARTITION" > spark_log.txt 2>&1
 
                 if [ $? -ne 0 ]; then
                     echo "ERRORE: il job Spark è fallito" >&2
                     exit 1
                 fi
 
-                # application ID
                 ID_LINE=$(grep "Submitted application application_" "spark_log.txt")
                 ID=$(echo "${ID_LINE}" | awk -F'application_' '{print $2}')
 
-                # scheduling YARN
+                sleep 20
+
+                curl -s "http://10.1.1.183:18080/api/v1/applications/application_${ID}/executors" > "executors.json"
                 yarn application -status application_"$ID" > output_yarn.txt 2>&1
 
-                {
-                    PARTITION_LINE=$(grep "Number of partitions" "spark_log.txt")
-                    REAL_PARTITION=$(echo "${PARTITION_LINE}" | awk -F': ' '{print $2}')
+                EXECUTORS_JSON=$(cat "executors.json")
+                DRIVER_MAX_MEMORY=$(echo "$EXECUTORS_JSON" | jq -r '.[] | select(.id=="driver") | .maxMemory // "null"')
 
-                    START_LINE=$(grep "Start-Time" "output_yarn.txt")
-                    START=$(echo "${START_LINE}" | awk -F' : ' '{print $2}')
+                exec1=$(echo "$EXECUTORS_JSON" | jq -r '.[] | select(.id != "driver") | .id' | sort -n | sed -n 1p)
+                exec2=$(echo "$EXECUTORS_JSON" | jq -r '.[] | select(.id != "driver") | .id' | sort -n | sed -n 2p)
 
-                    END_LINE=$(grep "Finish-Time" "output_yarn.txt")
-                    END=$(echo "${END_LINE}" | awk -F' : ' '{print $2}')
+                extract_executor_data() {
+                    local id=$1
+                    if [ "$id" != "" ]; then
+                        max_memory=$(echo "$EXECUTORS_JSON" | jq -r ".[] | select(.id==\"$id\") | .maxMemory // \"null\"")
+                        peak_heap=$(echo "$EXECUTORS_JSON" | jq -r ".[] | select(.id==\"$id\") | .peakMemoryMetrics.JVMHeapMemory // \"null\"")
+                        peak_offheap=$(echo "$EXECUTORS_JSON" | jq -r ".[] | select(.id==\"$id\") | .peakMemoryMetrics.JVMOffHeapMemory // \"null\"")
+                        rss_memory=$(echo "$EXECUTORS_JSON" | jq -r ".[] | select(.id==\"$id\") | .peakMemoryMetrics.ProcessTreeJVMRSSMemory // \"null\"")
+                        echo "$max_memory,$peak_heap,$peak_offheap,$rss_memory"
+                    else
+                        echo "null,null,null,null"
+                    fi
+                }
 
-                    DIFF_MS=$(( END - START ))
+                EXEC1_DATA=$(extract_executor_data "$exec1")
+                EXEC2_DATA=$(extract_executor_data "$exec2")
 
-                    TS=$(date -d '+2 hours' '+%Y-%m-%d %H:%M:%S')
-                    
-                    echo "spark,$SIZE,$DATASET_SIZE,$PARTITION,$REAL_PARTITION,$DIFF_MS,$TS"
-                } >> spark.csv
+                REAL_PARTITION_LINE=$(grep "Number of partitions" "spark_log.txt")
+                REAL_PARTITION=$(echo "${REAL_PARTITION_LINE}" | awk -F': ' '{print $2}')
+
+                START=$(grep "Start-Time" "output_yarn.txt" | awk -F' : ' '{print $2}')
+                END=$(grep "Finish-Time" "output_yarn.txt" | awk -F' : ' '{print $2}')
+                ALLOC=$(awk '/Aggregate Resource Allocation/ { print $5 }' output_yarn.txt)
+
+                DIFF_MS=$(( END - START ))
+
+                TS=$(date -d '+2 hours' '+%Y-%m-%d %H:%M:%S')
+
+                echo "$TS,spark,$SIZE,$DOC,$PARTITION,$REAL_PARTITION,$DRIVER_MAX_MEMORY,$EXEC1_DATA,$EXEC2_DATA,$ALLOC,$DIFF_MS" >> spark.csv
 
                 echo "Results for $INPUT_DIR saved in spark.csv"
-
                 ((OUTPUT_BASE_INDEX++))
             done
         done

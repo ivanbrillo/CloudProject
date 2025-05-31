@@ -2,7 +2,7 @@ import time
 import os
 
 def load_index(path):
-    index = {}  # Dictionary to store the inverted index: word -> set of filenames
+    index = {}  # Dictionary to store the inverted index: word:setFileNames
     with open(path, 'r', encoding='utf-8') as f:
         for line in f:
             parts = line.strip().split()
@@ -12,7 +12,7 @@ def load_index(path):
             term = parts[0] # Extract the word
             files = {entry.split(':')[0] for entry in parts[1:]}    # The list of entries like 'doc1.txt:3', 'doc2.txt:1'
 
-            index[term] = files # Map the word to the set of filenames
+            index[term] = files
     return index
 
 def build_inverted_index(directory):
@@ -25,18 +25,18 @@ def build_inverted_index(directory):
     return inverted_index
 
 def search_query(inverted_index, query):
-    terms = query.strip().split()   # Split the query into individual terms
+    terms = query.split()   # Split the query into individual terms
 
     result_files = inverted_index.get(terms[0], set()).copy()
 
     for term in terms[1:]:
-        result_files &= inverted_index.get(term, set())
+        result_files &= inverted_index.get(term, set()) # Set intersection
 
     return result_files
 
 
 def main():
-    directory_path = 'outputPython10/1GB'
+    directory_path = 'python/outputPython10/1GB'
     print("Loading Inverted Index ...")
     inverted_index = build_inverted_index(directory_path)
     print("Inverted Index loaded")
@@ -44,7 +44,7 @@ def main():
     print("Enter your query (e.g., cloud computing). Press Enter to exit.")
 
     while True:
-        query = input("\nQuery > ").strip()   # Read user input and remove leading/trailing spaces
+        query = input("\nQuery > ").strip().lower()   # Read user input and remove leading/trailing spaces
         
         if not query:  # Exit if the input is empty (user just pressed Enter)
             break   

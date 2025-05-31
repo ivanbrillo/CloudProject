@@ -1,22 +1,22 @@
-2025-05-30 07:24:22,252 INFO client.RMProxy: Connecting to ResourceManager at hadoop-namenode/10.1.1.183:8032
-2025-05-30 07:24:22,831 INFO conf.Configuration: resource-types.xml not found
-2025-05-30 07:24:22,833 INFO resource.ResourceUtils: Unable to find 'resource-types.xml'.
+2025-05-31 10:16:36,411 INFO client.RMProxy: Connecting to ResourceManager at hadoop-namenode/10.1.1.183:8032
+2025-05-31 10:16:36,943 INFO conf.Configuration: resource-types.xml not found
+2025-05-31 10:16:36,944 INFO resource.ResourceUtils: Unable to find 'resource-types.xml'.
 Application Report : 
-	Application-Id : application_1747652871095_1659
+	Application-Id : application_1747652871095_2007
 	Application-Name : invertedIndex
 	Application-Type : SPARK
 	User : hadoop
 	Queue : default
 	Application Priority : 0
-	Start-Time : 1748588864579
-	Finish-Time : 1748589839366
+	Start-Time : 1748686096427
+	Finish-Time : 1748686573812
 	Progress : 100%
 	State : FINISHED
 	Final-State : SUCCEEDED
 	Tracking-URL : N/A
 	RPC Port : -1
 	AM Host : 10.1.1.192
-	Aggregate Resource Allocation : 1739135 MB-seconds, 1940 vcore-seconds
+	Aggregate Resource Allocation : 848943 MB-seconds, 946 vcore-seconds
 	Aggregate Resource Preempted : 0 MB-seconds, 0 vcore-seconds
 	Log Aggregation Status : DISABLED
 	Diagnostics : 

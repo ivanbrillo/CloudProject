@@ -1,14 +1,15 @@
 #!/bin/bash
 
-MAIN_CLASS="it.unipi.hadoop.InvertedIndex"
+MAIN_CLASS="it.unipi.hadoop.InvertedIndexInMapperCombiner"
 TIMES=4
 OUTPUT_BASE_INDEX=2
 
+    
 for (( RUN_ID=1; RUN_ID<=TIMES; RUN_ID++ )); do
     echo "--- Iteration #${RUN_ID} ---"
-
+        
     INPUT_DIR="projectInput_100doc/2GB"
-    OUTPUT_DIR="output_100doc/${OUTPUT_BASE_INDEX}"
+    OUTPUT_DIR="outputInMapper_100doc/${OUTPUT_BASE_INDEX}"
 
     hadoop jar ../invertedIndex/target/invertedIndex-1.0-SNAPSHOT.jar "$MAIN_CLASS" -D mapreduce.job.reduces=5 "$INPUT_DIR" "$OUTPUT_DIR" > output_log.txt 2>&1
 
@@ -37,9 +38,9 @@ for (( RUN_ID=1; RUN_ID<=TIMES; RUN_ID++ )); do
 
     DIFF_MS=$(( END - START ))
 
-    echo "$TS,hadoop,$SPLIT,$PHYSICAL_MEMORY,$PEAK_MAP_PHYSICAL_MEMORY,$PEAK_REDUCE_PHYSICAL_MEMORY,$ALLOC,$DIFF_MS" >> hadoop2.csv
+    echo "$TS,hadoop,$SPLIT,$PHYSICAL_MEMORY,$PEAK_MAP_PHYSICAL_MEMORY,$PEAK_REDUCE_PHYSICAL_MEMORY,$ALLOC,$DIFF_MS" >> hadoopInMapperCombiner.csv
 
-    echo "Results for $INPUT_DIR saved in hadoop2.csv"
+    echo "Results for $INPUT_DIR saved in hadoopInMapperCombiner.csv"
     ((OUTPUT_BASE_INDEX++))
 done
 
