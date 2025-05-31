@@ -12,7 +12,7 @@ import java.io.IOException;
 @NoArgsConstructor
 @Setter
 @Getter
-public class FileCountData implements Writable, Comparable<FileCountData> {
+public class FileCountData implements Writable {
     private String filename;
     private long count;
 
@@ -34,11 +34,5 @@ public class FileCountData implements Writable, Comparable<FileCountData> {
     public void write(DataOutput out) throws IOException {
         out.writeUTF(filename); // write the filename as UTF-8 string
         out.writeLong(count);   // write the count   
-    }
-
-    // Method to compare two FileCountData objects for sorting purposes
-    @Override
-    public int compareTo(FileCountData o) {
-        return this.filename.compareTo(o.filename);
     }
 }

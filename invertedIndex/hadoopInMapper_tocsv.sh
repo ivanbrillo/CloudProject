@@ -1,13 +1,13 @@
 #!/bin/bash
 
-TIMES=1
+TIMES=5
 MAIN_CLASS="it.unipi.hadoop.InvertedIndexInMapperCombiner"          # Main class and reducer count
 
 # List of input size directories
-DATASET_SIZES=(10doc 20doc)                                # Dataset size: choose between "10doc" or "20doc"
-SIZES=(512KB 1MB 512MB 1GB 2GB)
+DATASET_SIZES=(10doc)                                # Dataset size: choose between "10doc" or "20doc"
+SIZES=(512KB)
 NUMBER_REDUCERS=(1 5 15)
-OUTPUT_BASE_INDEX=1
+OUTPUT_BASE_INDEX=10
 
 for DATASET_SIZE in "${DATASET_SIZES[@]}"; do
     echo "=== Running with ${DATASET_SIZE} documents ==="
@@ -34,7 +34,7 @@ for DATASET_SIZE in "${DATASET_SIZES[@]}"; do
                 ID_LINE=$(grep "Running job:" "output_log.txt")
                 ID=$(echo "${ID_LINE}" | awk -F'job_' '{print $2}')
 
-                # scheduling YARN
+                # Query YARN for application status
                 yarn application -status application_"$ID" > output_yarn.txt 2>&1
 
                 {
@@ -59,7 +59,7 @@ for DATASET_SIZE in "${DATASET_SIZES[@]}"; do
 
                 echo "Results for $INPUT_DIR saved in hadoopInMapperCombiner.csv"
 
-                # Incrementa l'indice dell'output
+                # Increment output directory index for immutability
                 ((OUTPUT_BASE_INDEX++))
             done
         done

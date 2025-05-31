@@ -29,6 +29,7 @@ public class InvertedIndexInMapperCombiner {
         private final Text outputKey = new Text();
         private final FileCountData outputValue = new FileCountData();
         private String filename;
+
         private Map<String, Long> localCounts;
         private Runtime runtime;
         private final double flushThreshold = 0.7;
@@ -44,11 +45,6 @@ public class InvertedIndexInMapperCombiner {
 
         @Override
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-            
-            // The following code should be used if CombineTextInputFormat is enabled.
-            // If CombineTextInputFormat is enabled, remember to comment out the right part of setup function.
-            // String fileInfo = context.getConfiguration().get("map.input.file");
-            // String filename = new Path(fileInfo).getName();
 
             String line = value.toString().toLowerCase();
             line = CLEAN_TEXT.matcher(line).replaceAll(" ");
@@ -59,6 +55,7 @@ public class InvertedIndexInMapperCombiner {
                 localCounts.merge(word, 1L, Long::sum);
             }
 
+            // Check current memory usage and flush if above threshold
             long used = runtime.totalMemory() - runtime.freeMemory();
             long max = runtime.maxMemory();
             if ((double) used / max >= flushThreshold) {
@@ -68,9 +65,15 @@ public class InvertedIndexInMapperCombiner {
 
         @Override
         protected void cleanup(Context context) throws IOException, InterruptedException {
+            // Emit any remaining counts at the end of the map task
             flush(context);
         }
 
+
+        /**
+         * Emits all localCounts entries to the context and clears the map.
+         * Also suggests garbage collection after clearing to free memory.
+         */
         private void flush(Context context) throws IOException, InterruptedException {
             for (Map.Entry<String, Long> entry : localCounts.entrySet()) {
                 outputKey.set(entry.getKey());
@@ -95,10 +98,11 @@ public class InvertedIndexInMapperCombiner {
                 totalCounts.merge(fcd.getFilename(), fcd.getCount(), Long::sum);
             }
 
+            // Build tab-separated "filename:count" list
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Long> entry : totalCounts.entrySet()) {
                 if (sb.length() > 0) {
-                    sb.append("\t"); // add separator only if it's not the first element
+                    sb.append("\t");    // add separator only if it's not the first element
                 }
                 sb.append(entry.getKey()).append(":").append(entry.getValue());
             }
@@ -130,9 +134,6 @@ public class InvertedIndexInMapperCombiner {
 
         job.getConfiguration().set("mapreduce.input.fileinputformat.input.dir.recursive", "true");
         
-        /*job.setInputFormatClass(CombineTextInputFormat.class);
-        CombineTextInputFormat.setMaxInputSplitSize(job, 1 * 1024 * 1024 * 1024);
-        CombineTextInputFormat.setMinInputSplitSize(job, 512 * 1024 * 1024);*/
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 

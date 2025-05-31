@@ -7,7 +7,7 @@ def search_query_on_demand(directory, query):
 
     term_to_files = {term: set() for term in terms}
 
-    # Scorri tutti i file nella cartella
+    # Iterate through all files
     for filename in os.listdir(directory):
         if not filename.endswith('.txt'):
             continue
@@ -24,7 +24,7 @@ def search_query_on_demand(directory, query):
                     files = {entry.split(':')[0] for entry in parts[1:]}
                     term_to_files[term].update(files)
 
-    # Fai l'intersezione dei file che contengono tutti i termini
+    # Intersect file sets for all terms to find common documents
     result_files = None
     for files in term_to_files.values():
         if result_files is None:
@@ -47,7 +47,7 @@ def main():
         result = search_query_on_demand(directory_path, query)
 
         if result:
-            print(f"Found in: {sorted(result)}")
+            print(f"Found in: {result}")
         else:
             print("No documents found!")
 

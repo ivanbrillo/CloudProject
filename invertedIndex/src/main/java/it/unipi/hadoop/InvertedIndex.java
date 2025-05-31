@@ -39,11 +39,6 @@ public class InvertedIndex {
         @Override
         public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 
-            // The following code should be used if CombineTextInputFormat is enabled.
-            // If CombineTextInputFormat is enabled, remember to comment out the setup function.
-            // String fileInfo = context.getConfiguration().get("map.input.file");
-            // String filename = new Path(fileInfo).getName();
-
             String line = value.toString().toLowerCase();
             line = CLEAN_TEXT.matcher(line).replaceAll(" ");
             
@@ -64,9 +59,11 @@ public class InvertedIndex {
         @Override
         protected void reduce(Text key, Iterable<FileCountData> values, Context context) throws IOException, InterruptedException {
 
+            // Aggregate counts per filename in a local map
             Map<String, Long> localCounts = new HashMap<>();
 
             for (FileCountData fcd : values) {
+                // Sum counts by filename
                 localCounts.merge(fcd.getFilename(), fcd.getCount(), Long::sum);
             }
 
@@ -90,10 +87,11 @@ public class InvertedIndex {
                 totalCounts.merge(fcd.getFilename(), fcd.getCount(), Long::sum);
             }
 
+            // Build tab-separated "filename:count" list
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Long> entry : totalCounts.entrySet()) {
                 if (sb.length() > 0) {
-                    sb.append("\t"); // add separator only if it's not the first element
+                    sb.append("\t");    // add separator only if it's not the first element
                 }
                 sb.append(entry.getKey()).append(":").append(entry.getValue());
             }
@@ -108,7 +106,7 @@ public class InvertedIndex {
 
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         if (otherArgs.length < 2) {
-            System.err.println("Usage: wordcount <in> [<in>...] <out>");
+            System.err.println("Usage: InvertedIndex <in> [<in>...] <out>");
             System.exit(2);
         }
 
@@ -126,9 +124,6 @@ public class InvertedIndex {
 
         job.getConfiguration().set("mapreduce.input.fileinputformat.input.dir.recursive", "true");
     
-        /*job.setInputFormatClass(CombineTextInputFormat.class);
-        CombineTextInputFormat.setMaxInputSplitSize(job, 1 * 1024 * 1024 * 1024);
-        CombineTextInputFormat.setMinInputSplitSize(job, 512 * 1024 * 1024);*/
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 

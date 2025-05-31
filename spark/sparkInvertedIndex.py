@@ -24,12 +24,16 @@ if __name__ == "__main__":
 
     input_path = sys.argv[1]
     output_path = sys.argv[2]
+    partitions = int(sys.argv[3]) if len(sys.argv) > 3 else None
 
     conf = SparkConf().setAppName("invertedIndex")
     sc = SparkContext(conf=conf)
 
-    # Read all files in the directory as (filename, content)
-    files = sc.wholeTextFiles(input_path + "/*", minPartitions=3)
+    # Read all files in the directory as (filename, content) with or without specifying partitions
+    if partitions > 0:
+        files = sc.wholeTextFiles(input_path + "/*", minPartitions=partitions)
+    else:
+        files = sc.wholeTextFiles(input_path + "/*")
 
     # Emit ((word, filename), 1) for each word
     words = files.flatMap(generate_words)

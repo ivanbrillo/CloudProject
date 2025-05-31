@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MAIN_CLASS="it.unipi.hadoop.InvertedIndex"          # Main class and reducer count
-TIMES=3
+TIMES=1
 
 # List of input size directories
 DATASET_SIZES=(10doc 20doc)                                # Dataset size: choose between "10doc" or "20doc"
@@ -34,7 +34,7 @@ for DATASET_SIZE in "${DATASET_SIZES[@]}"; do
                 ID_LINE=$(grep "Running job:" "output_log.txt")
                 ID=$(echo "${ID_LINE}" | awk -F'job_' '{print $2}')
 
-                # scheduling YARN
+                 # Query YARN for application status
                 yarn application -status application_"$ID" > output_yarn.txt 2>&1
 
                 {
@@ -59,7 +59,7 @@ for DATASET_SIZE in "${DATASET_SIZES[@]}"; do
 
                 echo "Results for $INPUT_DIR saved in hadoop.csv"
 
-                # Incrementa l'indice dell'output
+                # Increment output directory index for immutability
                 ((OUTPUT_BASE_INDEX++))
             done
         done
