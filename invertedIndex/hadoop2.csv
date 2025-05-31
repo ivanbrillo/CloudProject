@@ -1,4 +1,4 @@
-timestamp,engine,datasetSize,docSize,numSplits,numReducers,physicalMemorySnapshot,peakMapPhysicalMemory,peakReducePhysicalMemory,aggregateResourceAllocation,jobDurationMs
+timestamp,engine,size,docSize,numSplits,numReducers,physicalMemorySnapshot,peakMapPhysicalMemory,peakReducePhysicalMemory,aggregateResourceAllocation,jobDurationMs
 2025-05-30 09:36:51,hadoop,512KB,10doc,10,1,2851848192,278814720,170754048,49207,26882
 2025-05-30 09:37:27,hadoop,1MB,10doc,10,1,2824642560,276381696,171196416,57258,28329
 2025-05-30 09:39:41,hadoop,512MB,10doc,10,1,3067019264,289456128,254033920,320030,127277

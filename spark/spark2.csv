@@ -1,4 +1,4 @@
-timestamp,engine,datasetSize,numDoc,requestedPartitions,realPartitions,driverMaxMemory,exec1MaxMemory,exec1PeakHeap,exec1PeakOffHeap,exec1RSS,exec2MaxMemory,exec2PeakHeap,exec2PeakOffHeap,exec2RSS,aggregateResourceAllocation,jobDurationMs
+timestamp,engine,size,docSize,requestedPartitions,realPartitions,driverMaxMemory,exec1MaxMemory,exec1PeakHeap,exec1PeakOffHeap,exec1RSS,exec2MaxMemory,exec2PeakHeap,exec2PeakOffHeap,exec2RSS,aggregateResourceAllocation,jobDurationMs
 2025-05-29 18:19:06,spark,512KB,10doc,-1,2,97832140,97832140,0,0,0,97832140,0,0,0,71310,31934
 2025-05-29 18:20:24,spark,1MB,10doc,-1,2,97832140,97832140,39022840,79295160,419172352,97832140,18280680,71990520,385224704,80481,38540
 2025-05-29 18:23:41,spark,512MB,10doc,-1,5,97832140,97832140,180275688,93571992,436502528,97832140,175704936,94050720,442478592,390445,151568
