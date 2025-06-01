@@ -30,10 +30,3 @@ Contains Spark implementation files:
 Contains Python implementation files:
 - `invertedIndex.py`: Python script implementing the inverted index
 - `resultsPython.csv`: CSV file containing Python implementation results
-
-### test100doc/
-Contains a separate test case analyzing the performance of Hadoop, Hadoop In-Mapper Combiner, and Spark implementations when processing 100 input files, providing insights into system behavior under larger workloads:
-- `spark2.sh`, `spark.sh`, `hadoop_tocsv2.sh`, `hadoopInMapper_tocsv2.sh`, and `executor.sh`: Shell scripts for running the different implementations and configuring the execution environment
-- `spark2.csv`, `spark.csv`, `hadoopInMapperCombiner2.csv`, and `hadoop2.csv`: CSV files containing the results from each implementation's execution
-- `output_log.txt`, `spark_log.txt`, `output_yarn.txt`, and `executors.json`: Log files containing execution information and metrics that are used to extract performance insights
-- `compare_memory.py`: Python script for comparing memory usage
