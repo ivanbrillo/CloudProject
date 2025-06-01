@@ -31,19 +31,16 @@ if __name__ == "__main__":
     spark = SparkSession.builder.appName("invertedIndex2").getOrCreate()
     sc = spark.sparkContext
 
-    # Read files line by line into a DataFrame (one row per line of text)
-    df = spark.read.text(input_path)
+    # Read files with the filename
+    df = spark.read.text(input_path).withColumn("filename", input_file_name())
 
-    # Optionally repartition input
+    # Optionally repartition
     if partitions and partitions > 0:
         df = df.repartition(partitions)
 
     print("Number of partitions:", df.rdd.getNumPartitions())
 
-    # Add a column with the full filename each line came from
-    df = df.withColumn("filename", input_file_name())
-
-    # Converti a RDD: (filename, line)
+    # Convert to RDD: (filename, line)
     rdd = df.rdd.map(lambda row: (row["filename"].split("/")[-1], row["value"]))
 
     # Emit ((word, filename), 1) for each word

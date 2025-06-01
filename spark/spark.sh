@@ -20,7 +20,7 @@ for DOC in "${DOCS[@]}"; do
                 INPUT_DIR="projectInput_${DOC}/${SIZE}"
                 OUTPUT_DIR="outputSpark_${DOC}/${OUTPUT_BASE_INDEX}_${SIZE}"
 
-                spark-submit --master yarn --conf spark.dynamicAllocation.enabled=true --conf spark.dynamicAllocation.maxExecutors=10 --conf spark.executor.processTreeMetrics.enabled=true sparkInvertedIndex2.py "$INPUT_DIR" "$OUTPUT_DIR" "$PARTITION" > spark_log.txt 2>&1
+                spark-submit --master yarn --conf spark.executor.processTreeMetrics.enabled=true sparkInvertedIndex2.py "$INPUT_DIR" "$OUTPUT_DIR" "$PARTITION" > spark_log.txt 2>&1
 
                 if [ $? -ne 0 ]; then
                     echo "ERRORE: il job Spark è fallito" >&2
