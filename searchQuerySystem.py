@@ -52,7 +52,7 @@ def main():
         result = search_query(inverted_index, query)
 
         if result:
-            print(f"Found in: {sorted(result)}")
+            print(f"Found in: {result}")
         else:
             print("No documents found!")
 

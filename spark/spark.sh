@@ -3,9 +3,9 @@
 TIMES=1
 
 DOCS=(10doc 20doc)
-SIZES=(2GB)
-PARTITIONS=(-1)
-OUTPUT_BASE_INDEX=215
+SIZES=(512KB 1MB 512MB 1GB 2GB)
+PARTITIONS=(-1 5 15)
+OUTPUT_BASE_INDEX=1
 
 for DOC in "${DOCS[@]}"; do
     echo "=== Running with ${DOC} documents ==="

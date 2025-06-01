@@ -70,12 +70,12 @@ def count_total_occurrences(inverted_index):
 def main():
     # --- USAGE INSTRUCTION ---
     # Run this script from the terminal like this:
-    # python3 script.py <NUM_FILE> <NUM_RUNS>
-    # Example: python3 script.py 20 3
+    # python3 invertedIndex.py <NUM_FILE> <NUM_RUNS>
+    # Example: python3 invertedIndex.py 20 3
     # This will process 20 files per folder and repeat the whole execution 3 times
 
     if len(sys.argv) != 3:
-        print("Usage: python script.py <NUM_FILE> <NUM_RUNS>")
+        print("Usage: python invertedIndex.py <NUM_FILE> <NUM_RUNS>")
         sys.exit(1)
 
     NUM_FILE = int(sys.argv[1])
