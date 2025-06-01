@@ -12,7 +12,6 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.apache.hadoop.mapreduce.lib.input.CombineTextInputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import java.io.IOException;
@@ -30,15 +29,12 @@ public class InvertedIndexInMapperCombiner {
         private final FileCountData outputValue = new FileCountData();
         private String filename;
 
-        private Map<String, Long> localCounts;
-        private Runtime runtime;
+        private final Map<String, Long> localCounts = new HashMap<>();
+        private final Runtime runtime = Runtime.getRuntime();
         private final double flushThreshold = 0.7;
 
         @Override
         protected void setup(Context context) throws IOException, InterruptedException {
-            localCounts = new HashMap<>();
-            runtime = Runtime.getRuntime();
-
             FileSplit split = (FileSplit) context.getInputSplit();
             filename = split.getPath().getName();
         }
@@ -52,7 +48,7 @@ public class InvertedIndexInMapperCombiner {
             StringTokenizer itr = new StringTokenizer(line);
             while (itr.hasMoreTokens()) {
                 String word = itr.nextToken();
-                localCounts.merge(word, 1L, Long::sum);
+                localCounts.merge(word, 1L, Long::sum); // Aggregate counts per word (since one file per mapper)
             }
 
             // Check current memory usage and flush if above threshold
@@ -69,16 +65,15 @@ public class InvertedIndexInMapperCombiner {
             flush(context);
         }
 
-
         /**
          * Emits all localCounts entries to the context and clears the map.
-         * Also suggests garbage collection after clearing to free memory.
+         * Also suggests garbage collection to free memory after clearing.
          */
         private void flush(Context context) throws IOException, InterruptedException {
             for (Map.Entry<String, Long> entry : localCounts.entrySet()) {
                 outputKey.set(entry.getKey());
-                outputValue.setCount(entry.getValue());
                 outputValue.setFilename(filename);
+                outputValue.setCount(entry.getValue());
                 context.write(outputKey, outputValue);
             }
             localCounts.clear();
@@ -92,6 +87,7 @@ public class InvertedIndexInMapperCombiner {
         @Override
         protected void reduce(Text key, Iterable<FileCountData> values, Context context) throws IOException, InterruptedException {
             
+            // Map fileName:count
             Map<String, Long> totalCounts = new HashMap<>();
 
             for (FileCountData fcd : values) {

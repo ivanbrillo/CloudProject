@@ -1,4 +1,4 @@
-type,size,doc,time,data
+type,datasetSize,docSize,jobDurationMs,data
 python,512KB,10doc,101.2754,2025-05-25 20:40:26
 python,1MB,10doc,175.406,2025-05-25 20:40:26
 python,512MB,10doc,81996.0284,2025-05-25 20:41:48

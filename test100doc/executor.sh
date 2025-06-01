@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./hadoop_tocsv2.sh
-./hadoopInMapper_tocsv2.sh
+./hadoop_tocsv.sh
+./hadoopInMapper_tocsv.sh
 ./spark.sh
 ./spark2.sh

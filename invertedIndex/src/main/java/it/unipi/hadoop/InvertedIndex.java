@@ -12,7 +12,6 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.apache.hadoop.mapreduce.lib.input.CombineTextInputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import java.io.IOException;
@@ -45,8 +44,8 @@ public class InvertedIndex {
             StringTokenizer itr = new StringTokenizer(line);
             while (itr.hasMoreTokens()) {
                 outputKey.set(itr.nextToken());
-                outputValue.setCount(1);
                 outputValue.setFilename(filename);
+                outputValue.setCount(1);
                 context.write(outputKey, outputValue);
             }
         }
@@ -81,6 +80,7 @@ public class InvertedIndex {
         @Override
         protected void reduce(Text key, Iterable<FileCountData> values, Context context) throws IOException, InterruptedException {
             
+            // Map fileName:count
             Map<String, Long> totalCounts = new HashMap<>();
 
             for (FileCountData fcd : values) {

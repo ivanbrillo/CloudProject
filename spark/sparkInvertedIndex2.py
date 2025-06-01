@@ -27,8 +27,8 @@ if __name__ == "__main__":
     output_path = sys.argv[2]
     partitions = int(sys.argv[3]) if len(sys.argv) > 3 else None
 
-    # Create a Spark session
-    spark = SparkSession.builder.appName("invertedIndex").getOrCreate()
+    # Create a Spark session that support DataFrames
+    spark = SparkSession.builder.appName("invertedIndex2").getOrCreate()
     sc = spark.sparkContext
 
     # Read files line by line into a DataFrame (one row per line of text)
@@ -49,19 +49,20 @@ if __name__ == "__main__":
     # Emit ((word, filename), 1) for each word
     words = rdd.flatMap(generate_words_from_line)
 
-    # Count occurrences of each (word, filename)
+    # Count occurrences of each (word, filename) -> ((word, filename), N)
     counts = words.reduceByKey(lambda a, b: a + b)
 
     # Group by word -> (word, [(filename, count), ...])
     invertedIndex = (counts
-                .map(lambda wordDocs_count: (wordDocs_count[0][0], [(wordDocs_count[0][1], wordDocs_count[1])]))
-                .reduceByKey(lambda a, b: a + b))
+                .map(lambda wordDocs_count: (wordDocs_count[0][0], [(wordDocs_count[0][1], wordDocs_count[1])]))    # [(word,(filename,N))]
+                .reduceByKey(lambda a, b: a + b)    # list concatenation (word, [(filename, count), ...])
+            )
 
     # Format as: word file1:count1 file2:count2 ...
     invertedIndexFormatted = invertedIndex.map(
                 lambda word_docList: word_docList[0] + "\t" + "\t".join(f"{fn}:{cnt}" for fn, cnt in word_docList[1]))
     
-    # Optionally coalesce output
+    # Optionally repartition output
     if partitions and partitions > 0:
         invertedIndexFormatted = invertedIndexFormatted.repartition(partitions)
 

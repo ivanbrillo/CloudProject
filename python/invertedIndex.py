@@ -16,7 +16,7 @@ def preprocess_text(text):
     return CLEANER.sub(' ', text).lower()
 
 def build_inverted_index(directory_path):    
-    inverted_index = defaultdict(lambda: defaultdict(int))
+    inverted_index = defaultdict(lambda: defaultdict(int))  # word:{fileName:count}
 
     # Iterate through all files in the given directory
     for filename in os.listdir(directory_path):
@@ -70,12 +70,12 @@ def count_total_occurrences(inverted_index):
 def main():
     # --- USAGE INSTRUCTION ---
     # Run this script from the terminal like this:
-    # python3 script.py <NUM_FILE> <NUM_RUNS>
-    # Example: python3 script.py 20 3
+    # python3 invertedIndex.py <NUM_FILE> <NUM_RUNS>
+    # Example: python3 invertedIndex.py 20 3
     # This will process 20 files per folder and repeat the whole execution 3 times
 
     if len(sys.argv) != 3:
-        print("Usage: python script.py <NUM_FILE> <NUM_RUNS>")
+        print("Usage: python invertedIndex.py <NUM_FILE> <NUM_RUNS>")
         sys.exit(1)
 
     NUM_FILE = int(sys.argv[1])
@@ -87,7 +87,7 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     for _ in range(num_runs):
-        for folder_name in input_folders:
+        for folder_name in input_folders:   # Different folders dimention
             start_time = time.time()
 
             folder_directory = os.path.join(input_dir, folder_name)
@@ -99,7 +99,6 @@ def main():
             formatter(inverted_index, folder_name, output_dir, 2)
 
             end_time = time.time()
-
 
             # ---------- METRICS ----------
             execution_time_ms = (end_time - start_time) * 1000      # Calculate the execution time in milliseconds
